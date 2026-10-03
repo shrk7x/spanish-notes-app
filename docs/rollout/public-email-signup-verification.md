@@ -18,6 +18,6 @@ Whole-repository ESLint still reports 21 existing errors and 8 warnings; the arc
 
 ## Production acceptance remains
 
-The migration has not been applied to production. Production SMTP delivery, Supabase confirmation settings, redirect allowlists, email templates, and actual cross-browser confirmation/recovery require verification during rollout. Follow [the rollout guide](public-email-signup.md). A successful local build and PostgreSQL fixture do not establish production email delivery.
+The migration was subsequently applied to production with explicit user authorization. Registration/confirmation settings and callback allowlists were updated and reread, and production transaction assertions passed with all transient data rolled back. Custom SMTP, frontend release, email-template switching and actual cross-browser confirmation/recovery delivery remain pending. Follow [the rollout guide](public-email-signup.md). A successful local build and PostgreSQL fixture do not establish production email delivery.
 
 The user's untracked `pr_description-share-top-banner.md` was preserved.
