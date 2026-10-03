@@ -30,7 +30,7 @@ describe('AuthGate', () => {
     getSession.mockResolvedValue({ data: { session: null }, error: null });
     renderWithI18n(<AuthGate />);
     expect(await screen.findByRole('button', { name: 'Sign in with Google' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Invited users: sign in with email' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Sign in with email' })).toHaveAttribute(
       'href',
       `${ROUTES.authSignIn}?next=${encodeURIComponent('/settings?section=shared-links')}`
     );

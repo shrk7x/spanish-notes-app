@@ -1,5 +1,9 @@
 'use client';
 
+import Link from 'next/link';
+import ConfirmationResendButton from '@/components/ConfirmationResendButton';
+import { ROUTES } from '@/constants';
+import { resolveSafeNext } from '@/utils/auth/resolveSafeNext';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@/utils/supabase/client';
@@ -7,18 +11,25 @@ import { useI18n } from '@/components/I18nProvider';
 
 interface EmailPasswordSignInFormProps {
   initialEmail?: string;
+  nextPath?: string;
+  linkError?: boolean;
 }
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
 }
 
-export default function EmailPasswordSignInForm({ initialEmail = '' }: EmailPasswordSignInFormProps) {
+export default function EmailPasswordSignInForm({
+  initialEmail = '',
+  nextPath = ROUTES.app,
+  linkError = false,
+}: EmailPasswordSignInFormProps) {
   const router = useRouter();
   const { t } = useI18n();
   const [email, setEmail] = useState(normalizeEmail(initialEmail));
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const mapErrorMessage = (rawMessage: string) => {
@@ -29,6 +40,7 @@ export default function EmailPasswordSignInForm({ initialEmail = '' }: EmailPass
     }
 
     if (normalized.includes('email not confirmed')) {
+      setNeedsConfirmation(true);
       return t('emailSignIn.emailNotConfirmed');
     }
 
@@ -63,6 +75,7 @@ export default function EmailPasswordSignInForm({ initialEmail = '' }: EmailPass
         return;
       }
 
+      router.replace(resolveSafeNext(nextPath));
       router.refresh();
     } catch {
       setErrorMessage(t('emailSignIn.genericError'));
@@ -74,10 +87,16 @@ export default function EmailPasswordSignInForm({ initialEmail = '' }: EmailPass
   return (
     <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
       <h1 className="text-2xl font-bold">{t('emailSignIn.title')}</h1>
-      <p className="mt-2 text-slate-600 dark:text-slate-400">{t('emailSignIn.subtitle')}</p>
+      <p className="mt-2 text-slate-600 dark:text-slate-400">
+        {t('emailSignIn.subtitle')}
+      </p>
 
+      {linkError && <p role="alert">{t('emailAuth.linkError')}</p>}
       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-        <label className="block text-sm font-medium" htmlFor="email-signin-email">
+        <label
+          className="block text-sm font-medium"
+          htmlFor="email-signin-email"
+        >
           {t('emailSignIn.emailLabel')}
         </label>
         <input
@@ -93,7 +112,10 @@ export default function EmailPasswordSignInForm({ initialEmail = '' }: EmailPass
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-blue-500/40 placeholder:text-slate-400 focus:ring-2 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
         />
 
-        <label className="block text-sm font-medium" htmlFor="email-signin-password">
+        <label
+          className="block text-sm font-medium"
+          htmlFor="email-signin-password"
+        >
           {t('emailSignIn.passwordLabel')}
         </label>
         <input
@@ -128,6 +150,20 @@ export default function EmailPasswordSignInForm({ initialEmail = '' }: EmailPass
           {isSubmitting ? t('emailSignIn.submitting') : t('emailSignIn.submit')}
         </button>
       </form>
+      {(needsConfirmation || linkError) && (
+        <ConfirmationResendButton
+          email={normalizeEmail(email)}
+          nextPath={nextPath}
+        />
+      )}
+      <nav className="mt-4 flex flex-wrap gap-4 text-sm text-blue-600">
+        <Link
+          href={`${ROUTES.authSignUp}?next=${encodeURIComponent(resolveSafeNext(nextPath))}`}
+        >
+          {t('emailAuth.signUp')}
+        </Link>
+        <Link href={ROUTES.authForgotPassword}>{t('emailAuth.forgot')}</Link>
+      </nav>
     </section>
   );
 }

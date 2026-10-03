@@ -65,6 +65,6 @@ describe('auth callback route', () => {
     const request = new NextRequest('http://localhost/auth/callback?code=bad');
     const response = await GET(request);
 
-    expect(response).toEqual({ redirected: true, url: 'http://localhost/?auth=error' });
+    expect(response).toEqual({ redirected: true, url: 'http://localhost/auth/sign-in?auth=error' });
   });
 });
