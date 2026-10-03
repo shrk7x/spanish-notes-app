@@ -34,7 +34,7 @@ export default function InviteEmailSignupForm({
   const [showPasswords, setShowPasswords] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [successEmail, setSuccessEmail] = useState<string | null>(null);
 
   const mapErrorMessage = (rawMessage: string) => {
     const normalized = rawMessage.toLowerCase();
@@ -96,7 +96,7 @@ export default function InviteEmailSignupForm({
 
     if (validationError) {
       setErrorMessage(validationError);
-      setIsSuccess(false);
+      setSuccessEmail(null);
       return;
     }
 
@@ -115,23 +115,23 @@ export default function InviteEmailSignupForm({
 
       if (error) {
         setErrorMessage(mapErrorMessage(error.message));
-        setIsSuccess(false);
+        setSuccessEmail(null);
         return;
       }
 
-      setIsSuccess(true);
+      setSuccessEmail(normalizedEmail);
       setPassword('');
       setConfirmPassword('');
     } catch {
       setErrorMessage(t('inviteSignup.genericError'));
-      setIsSuccess(false);
+      setSuccessEmail(null);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // 注册成功后完全替换表单，避免与表单混在一起造成困惑
-  if (isSuccess) {
+  if (successEmail) {
     return (
       <section
         role="status"
@@ -147,15 +147,12 @@ export default function InviteEmailSignupForm({
             {t('inviteSignup.successBody')}
           </p>
           <p className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-            {normalizedEmail}
+            {successEmail}
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             {t('inviteSignup.successHint')}
           </p>
-          <ConfirmationResendButton
-            email={normalizedEmail}
-            nextPath={nextPath}
-          />
+          <ConfirmationResendButton email={successEmail} nextPath={nextPath} />
           <Link
             href={`${ROUTES.authSignIn}?next=${encodeURIComponent(resolveSafeNext(nextPath))}`}
           >
@@ -218,7 +215,7 @@ export default function InviteEmailSignupForm({
           onChange={(event) => {
             setPassword(event.target.value);
             setErrorMessage(null);
-            setIsSuccess(false);
+            setSuccessEmail(null);
           }}
           aria-describedby="invite-signup-password-help"
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-blue-500/40 placeholder:text-slate-400 focus:ring-2 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
@@ -246,7 +243,7 @@ export default function InviteEmailSignupForm({
           onChange={(event) => {
             setConfirmPassword(event.target.value);
             setErrorMessage(null);
-            setIsSuccess(false);
+            setSuccessEmail(null);
           }}
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-blue-500/40 placeholder:text-slate-400 focus:ring-2 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
         />

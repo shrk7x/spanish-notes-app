@@ -26,7 +26,7 @@ export default async function EmailSignInPage({
   const params = await searchParams;
   const nextPath = resolveSafeNext(params.next);
 
-  if (user) {
+  if (user && params.auth !== 'error') {
     redirect(nextPath);
   }
 

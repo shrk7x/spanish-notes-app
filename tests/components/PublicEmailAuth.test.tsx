@@ -4,16 +4,23 @@ import InviteEmailSignupForm from '@/components/InviteEmailSignupForm';
 import EmailPasswordSignInForm from '@/components/EmailPasswordSignInForm';
 import PasswordRecoveryForm from '@/components/PasswordRecoveryForm';
 import { renderWithI18n } from '../utils/renderWithI18n';
-const { signUp, signInWithPassword, resend, resetPasswordForEmail, updateUser, replace, refresh } =
-  vi.hoisted(() => ({
-    signUp: vi.fn(),
-    signInWithPassword: vi.fn(),
-    resend: vi.fn(),
-    resetPasswordForEmail: vi.fn(),
-    updateUser: vi.fn(),
-    replace: vi.fn(),
-    refresh: vi.fn(),
-  }));
+const {
+  signUp,
+  signInWithPassword,
+  resend,
+  resetPasswordForEmail,
+  updateUser,
+  replace,
+  refresh,
+} = vi.hoisted(() => ({
+  signUp: vi.fn(),
+  signInWithPassword: vi.fn(),
+  resend: vi.fn(),
+  resetPasswordForEmail: vi.fn(),
+  updateUser: vi.fn(),
+  replace: vi.fn(),
+  refresh: vi.fn(),
+}));
 vi.mock('@/utils/supabase/client', () => ({
   createBrowserClient: () => ({
     auth: {
@@ -198,5 +205,36 @@ describe('public email auth', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: '发送重置链接' }));
     expect(await screen.findByRole('status')).toHaveTextContent('如果账号存在');
+  });
+  it('keeps confirmation and resend tied to the submitted mailbox during edits', async () => {
+    let finish!: (value: { error: null }) => void;
+    signUp.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    renderWithI18n(<InviteEmailSignupForm initialEmail="a@example.com" />);
+    fireEvent.change(screen.getByLabelText('Password'), {
+      target: { value: 'Secret123' },
+    });
+    fireEvent.change(screen.getByLabelText('Confirm password'), {
+      target: { value: 'Secret123' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'b@example.com' },
+    });
+    finish({ error: null });
+    expect(await screen.findByText('a@example.com')).toBeInTheDocument();
+    expect(screen.queryByText('b@example.com')).not.toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Resend confirmation' })
+    );
+    await waitFor(() =>
+      expect(resend).toHaveBeenCalledWith(
+        expect.objectContaining({ email: 'a@example.com', type: 'signup' })
+      )
+    );
   });
 });

@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '../../utils/renderWithI18n';
+import SignInPage from '@/app/auth/sign-in/page';
 import InvitePage from '@/app/auth/invite/page';
 import SignupPage from '@/app/auth/sign-up/page';
 import UpdatePage from '@/app/auth/update-password/page';
@@ -11,7 +14,10 @@ const { getUser, redirect } = vi.hoisted(() => ({
 vi.mock('@/utils/supabase/server', () => ({
   createServerClient: () => ({ auth: { getUser } }),
 }));
-vi.mock('next/navigation', () => ({ redirect }));
+vi.mock('next/navigation', () => ({
+  redirect,
+  useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }),
+}));
 describe('public email pages', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -54,5 +60,17 @@ describe('public email pages', () => {
       error: null,
     });
     expect(await UpdatePage()).toBeTruthy();
+  });
+  it('shows failed confirmation guidance even with an existing authenticated session', async () => {
+    getUser.mockResolvedValue({ data: { user: { id: 'u' } }, error: null });
+    const page = await SignInPage({
+      searchParams: Promise.resolve({ auth: 'error', next: '/settings' }),
+    });
+    renderWithI18n(page);
+    expect(screen.getByRole('alert')).toHaveTextContent('invalid or expired');
+    expect(
+      screen.getByRole('button', { name: 'Resend confirmation' })
+    ).toBeInTheDocument();
+    expect(redirect).not.toHaveBeenCalled();
   });
 });
