@@ -36,10 +36,10 @@ export default async function RootLayout({
     >
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
-        <link rel="icon" href="/icons/favicon.ico" />
-        <link rel="icon" href="/icons/favicon-32x32.png" sizes="32x32" type="image/png" />
-        <link rel="icon" href="/icons/favicon-16x16.png" sizes="16x16" type="image/png" />
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link rel="icon" href="/icons/favicon.ico?v=2" />
+        <link rel="icon" href="/icons/favicon-32x32.png?v=2" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/icons/favicon-16x16.png?v=2" sizes="16x16" type="image/png" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=2" />
         <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
