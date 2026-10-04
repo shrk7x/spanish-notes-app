@@ -72,7 +72,7 @@ describe('InviteEmailSignupForm', () => {
     });
   });
 
-  it('shows invite-required error for uninvited email', async () => {
+  it('shows a retry error when backend registration fails', async () => {
     signUp.mockResolvedValue({
       data: { user: null },
       error: new Error('invite_required'),
@@ -87,7 +87,7 @@ describe('InviteEmailSignupForm', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
-    expect(await screen.findByText('This email is not invited.')).toBeInTheDocument();
+    expect(await screen.findByText('Unable to create account. Please try again.')).toBeInTheDocument();
   });
 
   it('shows success state after invited signup request', async () => {
@@ -120,7 +120,7 @@ describe('InviteEmailSignupForm', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
-    expect(await screen.findByText('This invite has already been used.')).toBeInTheDocument();
+    expect(await screen.findByText('Unable to create account. Please try again.')).toBeInTheDocument();
   });
 
   it('shows invalid input error on empty password', async () => {
@@ -178,6 +178,6 @@ describe('InviteEmailSignupForm', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
 
-    expect(await screen.findByText('Registration failed. Please contact support.')).toBeInTheDocument();
+    expect(await screen.findByText('Unable to create account. Please try again.')).toBeInTheDocument();
   });
 });

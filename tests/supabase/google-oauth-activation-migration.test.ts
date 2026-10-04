@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 const migrationPath = join(
   process.cwd(),
-  'supabase/migrations/010_auto_activate_google_oauth_profiles.sql',
+  'supabase/migrations/20261003190758_auto_activate_google_oauth_profiles.sql',
 );
 
 describe('Google OAuth activation migration', () => {

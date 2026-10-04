@@ -3,10 +3,14 @@
 import { FormEvent, useState } from 'react';
 import { createBrowserClient } from '@/utils/supabase/client';
 import { useI18n } from '@/components/I18nProvider';
+import Link from 'next/link';
+import ConfirmationResendButton from '@/components/ConfirmationResendButton';
+import { resolveSafeNext } from '@/utils/auth/resolveSafeNext';
 import { ROUTES } from '@/constants';
 
 interface InviteEmailSignupFormProps {
   initialEmail?: string;
+  nextPath?: string;
 }
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -19,7 +23,10 @@ function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
 }
 
-export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmailSignupFormProps) {
+export default function InviteEmailSignupForm({
+  initialEmail = '',
+  nextPath = ROUTES.app,
+}: InviteEmailSignupFormProps) {
   const { t } = useI18n();
   const [email, setEmail] = useState(normalizeEmail(initialEmail));
   const [password, setPassword] = useState('');
@@ -27,21 +34,16 @@ export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmail
   const [showPasswords, setShowPasswords] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [successEmail, setSuccessEmail] = useState<string | null>(null);
 
   const mapErrorMessage = (rawMessage: string) => {
     const normalized = rawMessage.toLowerCase();
 
-    if (normalized.includes('invite_required')) {
-      return t('inviteSignup.inviteRequired');
-    }
-
-    if (normalized.includes('invite_already_used')) {
-      return t('inviteSignup.inviteUsed');
-    }
-
     // Supabase 密码强度策略错误：只靠关键字检测
-    if (normalized.includes('password should contain') || normalized.includes('password is too weak')) {
+    if (
+      normalized.includes('password should contain') ||
+      normalized.includes('password is too weak')
+    ) {
       return t('inviteSignup.passwordWeakGeneric');
     }
 
@@ -94,7 +96,7 @@ export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmail
 
     if (validationError) {
       setErrorMessage(validationError);
-      setIsSuccess(false);
+      setSuccessEmail(null);
       return;
     }
 
@@ -107,33 +109,33 @@ export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmail
         email: normalizedEmail,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(ROUTES.app)}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(resolveSafeNext(nextPath))}`,
         },
       });
 
       if (error) {
         setErrorMessage(mapErrorMessage(error.message));
-        setIsSuccess(false);
+        setSuccessEmail(null);
         return;
       }
 
-      setIsSuccess(true);
+      setSuccessEmail(normalizedEmail);
       setPassword('');
       setConfirmPassword('');
     } catch {
       setErrorMessage(t('inviteSignup.genericError'));
-      setIsSuccess(false);
+      setSuccessEmail(null);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // 注册成功后完全替换表单，避免与表单混在一起造成困惑
-  if (isSuccess) {
+  if (successEmail) {
     return (
-      <section 
-        role="status" 
-        aria-live="polite" 
+      <section
+        role="status"
+        aria-live="polite"
         className="w-full max-w-md rounded-2xl border border-emerald-200 bg-white p-6 text-slate-900 shadow-xl dark:border-emerald-900/50 dark:bg-slate-900 dark:text-slate-100"
       >
         <div className="flex flex-col items-center gap-3 text-center">
@@ -145,11 +147,17 @@ export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmail
             {t('inviteSignup.successBody')}
           </p>
           <p className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-            {normalizedEmail}
+            {successEmail}
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             {t('inviteSignup.successHint')}
           </p>
+          <ConfirmationResendButton email={successEmail} nextPath={nextPath} />
+          <Link
+            href={`${ROUTES.authSignIn}?next=${encodeURIComponent(resolveSafeNext(nextPath))}`}
+          >
+            {t('emailAuth.signIn')}
+          </Link>
         </div>
       </section>
     );
@@ -158,10 +166,15 @@ export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmail
   return (
     <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
       <h1 className="text-2xl font-bold">{t('inviteSignup.title')}</h1>
-      <p className="mt-2 text-slate-600 dark:text-slate-400">{t('inviteSignup.subtitle')}</p>
+      <p className="mt-2 text-slate-600 dark:text-slate-400">
+        {t('inviteSignup.subtitle')}
+      </p>
 
       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-        <label className="block text-sm font-medium" htmlFor="invite-signup-email">
+        <label
+          className="block text-sm font-medium"
+          htmlFor="invite-signup-email"
+        >
           {t('inviteSignup.emailLabel')}
         </label>
         <input
@@ -175,7 +188,10 @@ export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmail
         />
 
         <div className="flex items-center justify-between gap-3">
-          <label className="block text-sm font-medium" htmlFor="invite-signup-password">
+          <label
+            className="block text-sm font-medium"
+            htmlFor="invite-signup-password"
+          >
             {t('inviteSignup.passwordLabel')}
           </label>
           <button
@@ -184,7 +200,9 @@ export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmail
             onClick={() => setShowPasswords((value) => !value)}
             className="rounded-md px-2 py-1 text-sm font-medium text-blue-700 transition-colors hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 dark:text-blue-300 dark:hover:text-blue-200"
           >
-            {showPasswords ? t('inviteSignup.hidePasswords') : t('inviteSignup.showPasswords')}
+            {showPasswords
+              ? t('inviteSignup.hidePasswords')
+              : t('inviteSignup.showPasswords')}
           </button>
         </div>
         <input
@@ -197,16 +215,22 @@ export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmail
           onChange={(event) => {
             setPassword(event.target.value);
             setErrorMessage(null);
-            setIsSuccess(false);
+            setSuccessEmail(null);
           }}
           aria-describedby="invite-signup-password-help"
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-blue-500/40 placeholder:text-slate-400 focus:ring-2 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
         />
-        <p id="invite-signup-password-help" className="text-sm text-slate-500 dark:text-slate-400">
+        <p
+          id="invite-signup-password-help"
+          className="text-sm text-slate-500 dark:text-slate-400"
+        >
           {t('inviteSignup.passwordRequirements')}
         </p>
 
-        <label className="block text-sm font-medium" htmlFor="invite-signup-confirm-password">
+        <label
+          className="block text-sm font-medium"
+          htmlFor="invite-signup-confirm-password"
+        >
           {t('inviteSignup.confirmPasswordLabel')}
         </label>
         <input
@@ -219,17 +243,20 @@ export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmail
           onChange={(event) => {
             setConfirmPassword(event.target.value);
             setErrorMessage(null);
-            setIsSuccess(false);
+            setSuccessEmail(null);
           }}
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-blue-500/40 placeholder:text-slate-400 focus:ring-2 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
         />
 
         {errorMessage && (
-          <p role="alert" aria-live="assertive" className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+          <p
+            role="alert"
+            aria-live="assertive"
+            className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
+          >
             {errorMessage}
           </p>
         )}
-
 
         <button
           type="submit"
@@ -237,9 +264,17 @@ export default function InviteEmailSignupForm({ initialEmail = '' }: InviteEmail
           aria-busy={isSubmitting}
           className="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {isSubmitting ? t('inviteSignup.submitting') : t('inviteSignup.submit')}
+          {isSubmitting
+            ? t('inviteSignup.submitting')
+            : t('inviteSignup.submit')}
         </button>
       </form>
+      <Link
+        className="mt-4 inline-block text-blue-600"
+        href={`${ROUTES.authSignIn}?next=${encodeURIComponent(resolveSafeNext(nextPath))}`}
+      >
+        {t('emailAuth.signIn')}
+      </Link>
     </section>
   );
 }
