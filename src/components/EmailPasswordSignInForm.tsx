@@ -85,13 +85,13 @@ export default function EmailPasswordSignInForm({
   };
 
   return (
-    <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
-      <h1 className="text-2xl font-bold">{t('emailSignIn.title')}</h1>
-      <p className="mt-2 text-slate-600 dark:text-slate-400">
+    <section className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-7 text-slate-900 shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+      <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t('emailSignIn.title')}</h1>
+      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
         {t('emailSignIn.subtitle')}
       </p>
 
-      {linkError && <p role="alert">{t('emailAuth.linkError')}</p>}
+      {linkError && <p role="alert" className="mt-3 text-xs text-rose-600 dark:text-rose-400">{t('emailAuth.linkError')}</p>}
       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
         <label
           className="block text-sm font-medium"
@@ -156,13 +156,19 @@ export default function EmailPasswordSignInForm({
           nextPath={nextPath}
         />
       )}
-      <nav className="mt-4 flex flex-wrap gap-4 text-sm text-blue-600">
+      <nav className="mt-5 flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
         <Link
           href={`${ROUTES.authSignUp}?next=${encodeURIComponent(resolveSafeNext(nextPath))}`}
+          className="font-medium text-blue-600 hover:text-blue-500 hover:underline dark:text-blue-400"
         >
           {t('emailAuth.signUp')}
         </Link>
-        <Link href={ROUTES.authForgotPassword}>{t('emailAuth.forgot')}</Link>
+        <Link
+          href={ROUTES.authForgotPassword}
+          className="text-slate-500 hover:text-slate-700 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
+        >
+          {t('emailAuth.forgot')}
+        </Link>
       </nav>
     </section>
   );

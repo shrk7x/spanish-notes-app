@@ -7,6 +7,7 @@ import Link from 'next/link';
 import ConfirmationResendButton from '@/components/ConfirmationResendButton';
 import { resolveSafeNext } from '@/utils/auth/resolveSafeNext';
 import { ROUTES } from '@/constants';
+import { Mail } from 'lucide-react';
 
 interface InviteEmailSignupFormProps {
   initialEmail?: string;
@@ -136,37 +137,42 @@ export default function InviteEmailSignupForm({
       <section
         role="status"
         aria-live="polite"
-        className="w-full max-w-md rounded-2xl border border-emerald-200 bg-white p-6 text-slate-900 shadow-xl dark:border-emerald-900/50 dark:bg-slate-900 dark:text-slate-100"
+        className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-7 text-slate-900 shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
       >
         <div className="flex flex-col items-center gap-3 text-center">
-          <span className="text-4xl">✉️</span>
-          <h1 className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
+            <Mail className="h-6 w-6" />
+          </div>
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
             {t('inviteSignup.successTitle')}
           </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             {t('inviteSignup.successBody')}
           </p>
-          <p className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+          <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-mono font-medium text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
             {successEmail}
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-slate-400 dark:text-slate-500">
             {t('inviteSignup.successHint')}
           </p>
           <ConfirmationResendButton email={successEmail} nextPath={nextPath} />
-          <Link
-            href={`${ROUTES.authSignIn}?next=${encodeURIComponent(resolveSafeNext(nextPath))}`}
-          >
-            {t('emailAuth.signIn')}
-          </Link>
+          <div className="mt-4 w-full border-t border-slate-100 pt-3 text-center dark:border-slate-800">
+            <Link
+              href={`${ROUTES.authSignIn}?next=${encodeURIComponent(resolveSafeNext(nextPath))}`}
+              className="text-xs font-medium text-blue-600 hover:text-blue-500 hover:underline dark:text-blue-400"
+            >
+              {t('emailAuth.signIn')}
+            </Link>
+          </div>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
-      <h1 className="text-2xl font-bold">{t('inviteSignup.title')}</h1>
-      <p className="mt-2 text-slate-600 dark:text-slate-400">
+    <section className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-7 text-slate-900 shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+      <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t('inviteSignup.title')}</h1>
+      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
         {t('inviteSignup.subtitle')}
       </p>
 
@@ -269,12 +275,15 @@ export default function InviteEmailSignupForm({
             : t('inviteSignup.submit')}
         </button>
       </form>
-      <Link
-        className="mt-4 inline-block text-blue-600"
-        href={`${ROUTES.authSignIn}?next=${encodeURIComponent(resolveSafeNext(nextPath))}`}
-      >
-        {t('emailAuth.signIn')}
-      </Link>
+      <div className="mt-5 text-center text-xs text-slate-500 dark:text-slate-400">
+        <span>{t('auth.hasAccount') || '已有账号？'} </span>
+        <Link
+          className="font-medium text-blue-600 hover:text-blue-500 hover:underline dark:text-blue-400"
+          href={`${ROUTES.authSignIn}?next=${encodeURIComponent(resolveSafeNext(nextPath))}`}
+        >
+          {t('emailAuth.signIn')}
+        </Link>
+      </div>
     </section>
   );
 }
