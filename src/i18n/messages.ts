@@ -30,6 +30,8 @@ export const messages: Record<Locale, Record<string, Record<string, string>>> = 
       signInFailed: 'Failed to sign in. Please try again.',
       signOut: 'Sign out',
       signOutFailed: 'Failed to sign out. Please try again.',
+      hasAccount: 'Already have an account?',
+      orDivider: 'or',
     },
     emailAuth: {
       signUp: 'Create account',
@@ -310,6 +312,8 @@ export const messages: Record<Locale, Record<string, Record<string, string>>> = 
       signInFailed: '登录失败，请重试。',
       signOut: '退出登录',
       signOutFailed: '退出登录失败，请重试。',
+      hasAccount: '已有账号？',
+      orDivider: '或',
     },
     emailAuth: {
       signUp: '创建账号',
