@@ -1,12 +1,12 @@
-const CACHE_NAME = 'psa-shell-v1';
+const CACHE_NAME = 'psa-shell-v2';
 const APP_SHELL = [
   '/',
   '/manifest.webmanifest',
-  '/icons/favicon-32x32.png',
-  '/icons/favicon-16x16.png',
-  '/icons/android-chrome-192x192.png',
-  '/icons/android-chrome-512x512.png',
-  '/icons/apple-touch-icon.png',
+  '/icons/favicon-32x32.png?v=2',
+  '/icons/favicon-16x16.png?v=2',
+  '/icons/android-chrome-192x192.png?v=2',
+  '/icons/android-chrome-512x512.png?v=2',
+  '/icons/apple-touch-icon.png?v=2',
 ];
 
 self.addEventListener('install', (event) => {
